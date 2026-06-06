@@ -58,7 +58,7 @@ button:disabled {
   width: min(100%, 480px);
   min-height: 100svh;
   margin: 0 auto;
-  padding: calc(6px + env(safe-area-inset-top)) 10px calc(78px + env(safe-area-inset-bottom));
+  padding: calc(2px + env(safe-area-inset-top)) 10px calc(70px + env(safe-area-inset-bottom));
 }
 
 .app-header {
@@ -66,8 +66,8 @@ button:disabled {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  min-height: 40px;
-  margin-bottom: 4px;
+  min-height: 30px;
+  margin-bottom: 2px;
 }
 
 .eyebrow,
@@ -77,7 +77,7 @@ button:disabled {
 .panel-heading span {
   margin: 0;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 10px;
 }
 
 h1,
@@ -87,16 +87,16 @@ h2 {
 }
 
 h1 {
-  font-size: 23px;
+  font-size: 21px;
 }
 
 h2 {
-  font-size: 15px;
+  font-size: 14px;
 }
 
 .icon-button {
-  width: 44px;
-  min-height: 40px;
+  width: 38px;
+  min-height: 34px;
   border: 1px solid var(--line);
   background: rgba(255, 255, 255, .9);
   color: var(--ink);
@@ -126,7 +126,7 @@ section {
 
 .hero-score div {
   min-width: 0;
-  padding: 9px 10px;
+  padding: 4px 10px;
   border-radius: 8px;
   background: linear-gradient(135deg, rgba(255, 255, 255, .88), rgba(255, 230, 241, .92));
   text-align: center;
@@ -134,15 +134,15 @@ section {
 
 .hero-score strong {
   display: block;
-  margin-top: 2px;
-  font-size: 28px;
+  margin-top: 1px;
+  font-size: 23px;
   line-height: 1;
 }
 
 .dice-panel,
 .score-panel,
 .history-panel {
-  padding: 9px;
+  padding: 7px;
 }
 
 .switch {
@@ -191,17 +191,22 @@ section {
 .dice-grid,
 .selected-dice {
   display: grid;
-  grid-template-columns: repeat(5, minmax(48px, 1fr));
+  justify-content: space-between;
   gap: 6px;
 }
 
+.selected-dice {
+  grid-template-columns: repeat(5, 50px);
+}
+
 .dice-grid {
-  grid-template-columns: repeat(6, minmax(40px, 1fr));
+  grid-template-columns: repeat(6, 50px);
 }
 
 .die {
-  aspect-ratio: 1;
-  min-height: 42px;
+  width: 100%;
+  height: 50px;
+  min-height: 0;
   border: 2px solid #504154;
   background: #fff;
   color: transparent;
@@ -230,8 +235,8 @@ section {
 .die[data-add-die="6"] { --pips: radial-gradient(circle at 30% 25%, #111 0 4px, transparent 4px), radial-gradient(circle at 70% 25%, #111 0 4px, transparent 4px), radial-gradient(circle at 30% 50%, #111 0 4px, transparent 4px), radial-gradient(circle at 70% 50%, #111 0 4px, transparent 4px), radial-gradient(circle at 30% 75%, #111 0 4px, transparent 4px), radial-gradient(circle at 70% 75%, #111 0 4px, transparent 4px); }
 
 .selected-dice {
-  margin-top: 6px;
-  min-height: 48px;
+  margin-top: 5px;
+  min-height: 50px;
 }
 
 .selected-dice .die {
@@ -261,7 +266,7 @@ section {
   grid-template-columns: 1fr auto;
   align-items: center;
   gap: 8px;
-  margin-bottom: 6px;
+  margin-bottom: 5px;
 }
 
 .hint,
@@ -281,7 +286,7 @@ section {
 .score-list {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px;
+  gap: 4px;
 }
 
 .score-row {
@@ -289,9 +294,9 @@ section {
   display: grid;
   grid-template-columns: 28px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 6px;
-  min-height: 44px;
-  padding: 5px 7px;
+  gap: 5px;
+  min-height: 34px;
+  padding: 2px 7px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #fff;
@@ -300,7 +305,7 @@ section {
 }
 
 .score-row strong {
-  font-size: 17px;
+  font-size: 16px;
 }
 
 .score-row span:not(.state) {
@@ -311,7 +316,7 @@ section {
 }
 
 .score-row .state {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--muted);
   white-space: nowrap;
 }
@@ -333,18 +338,21 @@ section {
 
 .score-row.summary {
   pointer-events: none;
+  min-height: 28px;
+  padding-top: 1px;
+  padding-bottom: 1px;
   background: #fff7fb;
   border-color: #ffc0d2;
 }
 
 .score-row.summary strong {
   color: var(--accent-3);
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .score-row.summary .state {
   color: var(--danger);
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 800;
 }
 
@@ -406,14 +414,14 @@ section {
   gap: 7px;
   width: min(100%, 480px);
   transform: translateX(-50%);
-  padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+  padding: 6px 10px calc(6px + env(safe-area-inset-bottom));
   border-top: 1px solid rgba(23, 33, 29, .12);
   background: rgba(255, 248, 252, .94);
   backdrop-filter: blur(12px);
 }
 
 .action-bar button {
-  min-height: 46px;
+  min-height: 42px;
   background: #352a3d;
   color: #fff;
   font-weight: 800;
