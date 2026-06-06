@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <title>Game Yacht</title>
-  <link rel="stylesheet" href="style.css?v=20260607-0142">
+  <link rel="stylesheet" href="style.css?v=20260607-0322">
 </head>
 <body>
   <div class="app-shell">
@@ -90,6 +90,11 @@
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="roll-toast" id="rollToast" role="status" aria-live="polite" hidden>
+    <span class="roll-toast__label">Roll!</span>
+    <canvas class="roll-toast__canvas" id="rollCanvas" width="640" height="260"></canvas>
+    <div class="roll-toast__dice" id="rollToastDice"></div>
+  </div>
   <div class="finish-celebration" id="finishCelebration" aria-live="polite" hidden>
     <div class="celebration-burst" aria-hidden="true"></div>
     <div class="celebration-card">
@@ -114,6 +119,6 @@
     </form>
   </dialog>
 
-  <script src="script.js?v=20260607-0142"></script>
+  <script src="script.js?v=20260607-0322"></script>
 </body>
 </html>

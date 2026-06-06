@@ -487,6 +487,191 @@ section {
   transform: translateX(-50%) translateY(-50%) scale(1);
 }
 
+.roll-toast {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: 35;
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+  width: min(330px, calc(100% - 42px));
+  padding: 16px 14px;
+  border: 2px solid rgba(255, 255, 255, .86);
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(255,255,255,.97), rgba(255,240,247,.96));
+  box-shadow: 0 20px 46px rgba(76, 41, 84, .24);
+  color: var(--ink);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(-48%) scale(.96);
+  transition: opacity .18s ease, transform .18s ease;
+  perspective: 700px;
+}
+
+.roll-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-50%) scale(1);
+}
+
+.roll-toast__label {
+  color: var(--accent-3);
+  font-size: 18px;
+  font-weight: 950;
+}
+
+.roll-toast__dice {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  color: var(--muted);
+  font-weight: 800;
+  perspective: 850px;
+  transform-style: preserve-3d;
+}
+
+.roll-toast__canvas {
+  width: 100%;
+  height: 150px;
+  display: block;
+}
+
+.roll-toast__cube {
+  position: relative;
+  display: block;
+  width: 58px;
+  height: 58px;
+  color: transparent;
+  transform-style: preserve-3d;
+  transform-origin: 50% 50%;
+  animation: rollCube 3s cubic-bezier(.18, .82, .16, 1) both;
+  animation-delay: calc(var(--roll-index) * 55ms);
+}
+
+.roll-toast__iso-face {
+  --pips: none;
+  position: absolute;
+  background: linear-gradient(145deg, #fff, #ece7ef);
+  border: 1px solid rgba(64, 50, 70, .9);
+  box-shadow: inset 2px 2px 5px rgba(255,255,255,.9), inset -4px -5px 9px rgba(65, 48, 70, .18);
+}
+
+.roll-toast__iso-face::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--pips);
+}
+
+.iso-front {
+  left: 8px;
+  top: 14px;
+  width: 42px;
+  height: 42px;
+  border-radius: 7px;
+  z-index: 3;
+}
+
+.iso-top {
+  left: 14px;
+  top: 2px;
+  width: 42px;
+  height: 18px;
+  border-radius: 7px 7px 3px 3px;
+  transform: skewX(-42deg);
+  transform-origin: bottom left;
+  background: linear-gradient(145deg, #fff, #f5edf7);
+  z-index: 2;
+}
+
+.iso-side {
+  left: 50px;
+  top: 9px;
+  width: 18px;
+  height: 42px;
+  border-radius: 3px 7px 7px 3px;
+  transform: skewY(-42deg);
+  transform-origin: top left;
+  background: linear-gradient(145deg, #ddd3e4, #bcaec8);
+  z-index: 1;
+}
+
+.roll-toast__iso-face[data-face="1"] { --pips: radial-gradient(circle at center, #ff4f7f 0 4px, transparent 4px); }
+.roll-toast__iso-face[data-face="2"] { --pips: radial-gradient(circle at 32% 32%, #111 0 3px, transparent 3px), radial-gradient(circle at 68% 68%, #111 0 3px, transparent 3px); }
+.roll-toast__iso-face[data-face="3"] { --pips: radial-gradient(circle at 32% 32%, #111 0 3px, transparent 3px), radial-gradient(circle at center, #111 0 3px, transparent 3px), radial-gradient(circle at 68% 68%, #111 0 3px, transparent 3px); }
+.roll-toast__iso-face[data-face="4"] { --pips: radial-gradient(circle at 32% 32%, #111 0 3px, transparent 3px), radial-gradient(circle at 68% 32%, #111 0 3px, transparent 3px), radial-gradient(circle at 32% 68%, #111 0 3px, transparent 3px), radial-gradient(circle at 68% 68%, #111 0 3px, transparent 3px); }
+.roll-toast__iso-face[data-face="5"] { --pips: radial-gradient(circle at 32% 32%, #111 0 3px, transparent 3px), radial-gradient(circle at 68% 32%, #111 0 3px, transparent 3px), radial-gradient(circle at center, #111 0 3px, transparent 3px), radial-gradient(circle at 32% 68%, #111 0 3px, transparent 3px), radial-gradient(circle at 68% 68%, #111 0 3px, transparent 3px); }
+.roll-toast__iso-face[data-face="6"] { --pips: radial-gradient(circle at 32% 25%, #111 0 3px, transparent 3px), radial-gradient(circle at 68% 25%, #111 0 3px, transparent 3px), radial-gradient(circle at 32% 50%, #111 0 3px, transparent 3px), radial-gradient(circle at 68% 50%, #111 0 3px, transparent 3px), radial-gradient(circle at 32% 75%, #111 0 3px, transparent 3px), radial-gradient(circle at 68% 75%, #111 0 3px, transparent 3px); }
+
+.roll-toast__cube::after {
+  content: "";
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: -16px;
+  height: 9px;
+  border-radius: 999px;
+  background: rgba(43, 38, 48, .22);
+  filter: blur(5px);
+  transform: translateZ(-24px) scale(.7);
+  animation: rollCubeShadow 3s ease both;
+  animation-delay: calc(var(--roll-index) * 55ms);
+}
+
+.roll-toast__face {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(64, 50, 70, .92);
+  border-radius: 8px;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.98), rgba(238,234,240,.96));
+  box-shadow:
+    inset 2px 2px 5px rgba(255,255,255,.95),
+    inset -4px -5px 10px rgba(65, 48, 70, .22),
+    0 0 0 1px rgba(255,255,255,.18);
+  backface-visibility: hidden;
+}
+
+.roll-toast__face.face-2,
+.roll-toast__face.face-5 {
+  background:
+    linear-gradient(145deg, rgba(244,239,247,.98), rgba(205,196,213,.96));
+}
+
+.roll-toast__face.face-3,
+.roll-toast__face.face-4 {
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.98), rgba(218,211,224,.96));
+}
+
+.roll-toast__face.face-6 {
+  background:
+    linear-gradient(145deg, rgba(232,225,238,.98), rgba(190,180,200,.96));
+}
+
+.roll-toast__face::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--pips);
+}
+
+.roll-toast__face.face-1 { --pips: radial-gradient(circle at center, #ff4f7f 0 5px, transparent 5px); transform: rotateY(0deg) translateZ(23px); }
+.roll-toast__face.face-2 { --pips: radial-gradient(circle at 30% 30%, #111 0 4px, transparent 4px), radial-gradient(circle at 70% 70%, #111 0 4px, transparent 4px); transform: rotateY(90deg) translateZ(23px); }
+.roll-toast__face.face-3 { --pips: radial-gradient(circle at 30% 30%, #111 0 4px, transparent 4px), radial-gradient(circle at center, #111 0 4px, transparent 4px), radial-gradient(circle at 70% 70%, #111 0 4px, transparent 4px); transform: rotateX(90deg) translateZ(23px); }
+.roll-toast__face.face-4 { --pips: radial-gradient(circle at 30% 30%, #111 0 4px, transparent 4px), radial-gradient(circle at 70% 30%, #111 0 4px, transparent 4px), radial-gradient(circle at 30% 70%, #111 0 4px, transparent 4px), radial-gradient(circle at 70% 70%, #111 0 4px, transparent 4px); transform: rotateX(-90deg) translateZ(23px); }
+.roll-toast__face.face-5 { --pips: radial-gradient(circle at 30% 30%, #111 0 4px, transparent 4px), radial-gradient(circle at 70% 30%, #111 0 4px, transparent 4px), radial-gradient(circle at center, #111 0 4px, transparent 4px), radial-gradient(circle at 30% 70%, #111 0 4px, transparent 4px), radial-gradient(circle at 70% 70%, #111 0 4px, transparent 4px); transform: rotateY(-90deg) translateZ(23px); }
+.roll-toast__face.face-6 { --pips: radial-gradient(circle at 30% 25%, #111 0 4px, transparent 4px), radial-gradient(circle at 70% 25%, #111 0 4px, transparent 4px), radial-gradient(circle at 30% 50%, #111 0 4px, transparent 4px), radial-gradient(circle at 70% 50%, #111 0 4px, transparent 4px), radial-gradient(circle at 30% 75%, #111 0 4px, transparent 4px), radial-gradient(circle at 70% 75%, #111 0 4px, transparent 4px); transform: rotateY(180deg) translateZ(23px); }
+
+.roll-toast__cube[data-value="1"] { --final-rotation: rotateX(0deg) rotateY(0deg) rotateZ(360deg); }
+.roll-toast__cube[data-value="2"] { --final-rotation: rotateX(0deg) rotateY(-90deg) rotateZ(360deg); }
+.roll-toast__cube[data-value="3"] { --final-rotation: rotateX(-90deg) rotateY(0deg) rotateZ(360deg); }
+.roll-toast__cube[data-value="4"] { --final-rotation: rotateX(90deg) rotateY(0deg) rotateZ(360deg); }
+.roll-toast__cube[data-value="5"] { --final-rotation: rotateX(0deg) rotateY(90deg) rotateZ(360deg); }
+.roll-toast__cube[data-value="6"] { --final-rotation: rotateX(0deg) rotateY(180deg) rotateZ(360deg); }
+
 .finish-celebration {
   position: fixed;
   inset: 0;
@@ -740,6 +925,50 @@ section {
 @keyframes burstSpin {
   from { transform: scale(.85) rotate(0deg); }
   to { transform: scale(.85) rotate(360deg); }
+}
+
+@keyframes rollCube {
+  0% {
+    opacity: 0;
+    transform: translate3d(var(--roll-x1), -230px, 120px) rotateX(var(--roll-rx-neg)) rotateY(var(--roll-ry)) rotateZ(var(--roll-rz)) scale(.58);
+    filter: blur(3px);
+  }
+  18% {
+    opacity: 1;
+    transform: translate3d(var(--roll-x2), var(--roll-y1), 42px) rotateX(58deg) rotateY(-42deg) rotateZ(67deg) scale(1.08);
+    filter: blur(.8px);
+  }
+  30% {
+    transform: translate3d(calc(var(--roll-x1) * -.22), -38px, 60px) rotateX(-48deg) rotateY(54deg) rotateZ(151deg) scale(.98);
+    filter: blur(.4px);
+  }
+  44% {
+    transform: translate3d(calc(var(--roll-x2) * .16), 12px, 36px) rotateX(46deg) rotateY(-36deg) rotateZ(238deg) scale(1.04);
+    filter: blur(0);
+  }
+  58% {
+    transform: translate3d(calc(var(--roll-x1) * -.08), -15px, 40px) rotateX(-34deg) rotateY(48deg) rotateZ(312deg) scale(.99);
+  }
+  72% {
+    transform: translate3d(3px, 4px, 26px) rotateX(24deg) rotateY(-30deg) rotateZ(352deg) scale(1.01);
+  }
+  86% {
+    transform: translate3d(0, -2px, 16px) rotateX(-16deg) rotateY(18deg) rotateZ(360deg) scale(1);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) var(--final-rotation) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes rollCubeShadow {
+  0% { opacity: 0; transform: translateZ(-24px) scale(.25); }
+  18% { opacity: .34; transform: translateZ(-24px) scale(1.08); }
+  30% { opacity: .16; transform: translateZ(-24px) scale(.62); }
+  44% { opacity: .3; transform: translateZ(-24px) scale(.98); }
+  58% { opacity: .18; transform: translateZ(-24px) scale(.72); }
+  72%, 100% { opacity: .24; transform: translateZ(-24px) scale(.86); }
 }
 
 dialog {

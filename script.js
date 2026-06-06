@@ -46,6 +46,9 @@
     helpDialog: $("helpDialog"),
     helpList: $("helpList"),
     toast: $("toast"),
+    rollToast: $("rollToast"),
+    rollToastDice: $("rollToastDice"),
+    rollCanvas: $("rollCanvas"),
     finishCelebration: $("finishCelebration"),
     celebrationKicker: $("celebrationKicker"),
     celebrationScore: $("celebrationScore"),
@@ -61,6 +64,8 @@
   let redoStack = [];
   let resultHistory = loadResults();
   let toastTimer = 0;
+  let rollToastTimer = 0;
+  let rollAnimationFrame = 0;
   let celebrationTimer = 0;
 
   function initialState(mode = "manual") {
@@ -356,6 +361,334 @@
     }, variant === "notice" ? 2600 : 2200);
   }
 
+  function showRollToast(values) {
+    clearTimeout(rollToastTimer);
+    cancelAnimationFrame(rollAnimationFrame);
+    els.rollToastDice.innerHTML = "";
+    els.rollToast.hidden = false;
+    if (!values.length) {
+      els.rollToastDice.textContent = "すべて Keep";
+      els.rollCanvas.hidden = true;
+    } else {
+      els.rollCanvas.hidden = false;
+      startCanvasRoll(values);
+    }
+    els.rollToast.classList.remove("show");
+    requestAnimationFrame(() => els.rollToast.classList.add("show"));
+    rollToastTimer = setTimeout(() => {
+      els.rollToast.classList.remove("show");
+      setTimeout(() => {
+        els.rollToast.hidden = true;
+      }, 180);
+    }, 3000);
+  }
+
+  function startCanvasRoll(values) {
+    const canvas = els.rollCanvas;
+    const ctx = canvas.getContext("2d");
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = Math.round(rect.width * dpr);
+    canvas.height = Math.round(rect.height * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const width = rect.width;
+    const height = rect.height;
+    const spacing = width / (values.length + 1);
+    const floorY = height - 62;
+    const sparks = [];
+    const dice = values.map((value, index) => ({
+      value,
+      index,
+      ...finalAnglesForValue(value),
+      x: spacing * (index + 1) + (Math.random() - 0.5) * 72,
+      y: -95 - Math.random() * 95 - index * 10,
+      vx: (Math.random() - 0.5) * 5.2,
+      vy: 1.2 + Math.random() * 1.6,
+      rx: Math.random() * Math.PI * 2,
+      ry: Math.random() * Math.PI * 2,
+      rz: Math.random() * Math.PI * 2,
+      avx: (Math.random() - 0.5) * 0.28,
+      avy: (Math.random() - 0.5) * 0.28,
+      avz: (Math.random() - 0.5) * 0.2,
+      targetX: spacing * (index + 1),
+      radius: 26,
+      delay: index * 55
+    }));
+    const start = performance.now();
+    let last = start;
+
+    function frame(now) {
+      const elapsed = now - start;
+      const dt = Math.min(2, (now - last) / 16.67);
+      last = now;
+      ctx.clearRect(0, 0, width, height);
+      drawRollStage(ctx, width, height);
+      stepRollPhysics(dice, sparks, width, floorY, dt, elapsed);
+      dice.forEach((die) => {
+        drawRollingDie(ctx, die);
+      });
+      drawSparks(ctx, sparks, dt);
+      if (elapsed < 3000) {
+        rollAnimationFrame = requestAnimationFrame(frame);
+      }
+    }
+    rollAnimationFrame = requestAnimationFrame(frame);
+  }
+
+  function stepRollPhysics(dice, sparks, width, floorY, dt, elapsed) {
+    const gravity = 0.56;
+    dice.forEach((die) => {
+      if (elapsed < die.delay) return;
+      die.vy += gravity * dt;
+      die.x += die.vx * dt;
+      die.y += die.vy * dt;
+      die.rx += die.avx * dt;
+      die.ry += die.avy * dt;
+      die.rz += die.avz * dt;
+
+      if (die.x < die.radius) {
+        die.x = die.radius;
+        die.vx = Math.abs(die.vx) * 0.68;
+        die.avz += 0.07;
+      }
+      if (die.x > width - die.radius) {
+        die.x = width - die.radius;
+        die.vx = -Math.abs(die.vx) * 0.68;
+        die.avz -= 0.07;
+      }
+      if (die.y > floorY) {
+        die.y = floorY;
+        if (Math.abs(die.vy) > 1.2) {
+          sparks.push({ x: die.x, y: floorY + 20, life: 1, power: Math.min(1, Math.abs(die.vy) / 15) });
+        }
+        if (Math.abs(die.vy) < 1.35) {
+          die.vy = 0;
+        } else {
+          die.vy = -Math.abs(die.vy) * 0.42;
+        }
+        die.vx *= 0.78;
+        die.avx *= 0.72;
+        die.avy *= 0.72;
+        die.avz *= 0.72;
+      }
+      die.vx += (die.targetX - die.x) * 0.0018 * dt;
+      if (die.y >= floorY - 0.5) {
+        die.vx *= 0.96;
+      }
+      const settle = Math.max(0, Math.min((elapsed - 1100) / 1600, 1));
+      const orientEase = settle * settle * 0.045 * dt;
+      die.rx += angleDelta(die.rx, die.rxTarget) * orientEase;
+      die.ry += angleDelta(die.ry, die.ryTarget) * orientEase;
+      die.rz += angleDelta(die.rz, die.rzTarget) * orientEase;
+      const spinDamp = 1 - settle * 0.055 * dt;
+      die.avx *= spinDamp;
+      die.avy *= spinDamp;
+      die.avz *= spinDamp;
+      if (elapsed > 2500) {
+        die.y += (floorY - die.y) * 0.08 * dt;
+        die.vy *= 0.72;
+        die.vx *= 0.86;
+      }
+    });
+
+    for (let i = 0; i < dice.length; i += 1) {
+      for (let j = i + 1; j < dice.length; j += 1) {
+        const a = dice[i];
+        const b = dice[j];
+        if (elapsed < a.delay || elapsed < b.delay) continue;
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        const dist = Math.hypot(dx, dy) || 1;
+        const minDist = (a.radius + b.radius) * 0.78;
+        if (dist >= minDist) continue;
+        const nx = dx / dist;
+        const ny = dy / dist;
+        const overlap = minDist - dist;
+        a.x -= nx * overlap * 0.5;
+        a.y -= ny * overlap * 0.5;
+        b.x += nx * overlap * 0.5;
+        b.y += ny * overlap * 0.5;
+        const rvx = b.vx - a.vx;
+        const rvy = b.vy - a.vy;
+        const impact = rvx * nx + rvy * ny;
+        if (impact < 0) {
+          const impulse = -impact * 0.58;
+          a.vx -= impulse * nx;
+          a.vy -= impulse * ny;
+          b.vx += impulse * nx;
+          b.vy += impulse * ny;
+          a.avz -= impulse * 0.022;
+          b.avz += impulse * 0.022;
+          sparks.push({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2, life: 1, power: Math.min(1, impulse / 7) });
+        }
+      }
+    }
+  }
+
+  function drawRollStage(ctx, width, height) {
+    const floorY = height - 42;
+    const grad = ctx.createLinearGradient(0, floorY - 70, 0, floorY + 18);
+    grad.addColorStop(0, "rgba(255,255,255,0)");
+    grad.addColorStop(1, "rgba(155,124,246,0.12)");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, width, height);
+    ctx.fillStyle = "rgba(43,38,48,0.08)";
+    ctx.beginPath();
+    ctx.ellipse(width / 2, floorY + 8, width * 0.38, 18, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function drawRollingDie(ctx, die) {
+    const size = 27;
+    drawCube(ctx, die.x, die.y, size, die.rx, die.ry, die.rz);
+  }
+
+  function drawSparks(ctx, sparks, dt) {
+    for (let i = sparks.length - 1; i >= 0; i -= 1) {
+      const spark = sparks[i];
+      spark.life -= 0.08 * dt;
+      if (spark.life <= 0) {
+        sparks.splice(i, 1);
+        continue;
+      }
+      ctx.save();
+      ctx.strokeStyle = `rgba(155, 124, 246, ${spark.life * 0.18})`;
+      ctx.lineWidth = 1 + spark.power * 0.7;
+      for (let ray = 0; ray < 5; ray += 1) {
+        const a = -Math.PI / 2 + ray * Math.PI / 4;
+        const len = 4 + spark.power * 8 * spark.life;
+        ctx.beginPath();
+        ctx.moveTo(spark.x + Math.cos(a) * 2, spark.y + Math.sin(a) * 2);
+        ctx.lineTo(spark.x + Math.cos(a) * len, spark.y + Math.sin(a) * len);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+  }
+
+  function angleDelta(current, target) {
+    return Math.atan2(Math.sin(target - current), Math.cos(target - current));
+  }
+
+  function finalAnglesForValue(value) {
+    return {
+      1: { rxTarget: -0.38, ryTarget: 0.44, rzTarget: -0.08 },
+      2: { rxTarget: -0.32, ryTarget: -Math.PI / 2 + 0.38, rzTarget: 0.06 },
+      3: { rxTarget: -Math.PI / 2 + 0.36, ryTarget: 0.38, rzTarget: -0.04 },
+      4: { rxTarget: Math.PI / 2 - 0.36, ryTarget: 0.38, rzTarget: 0.04 },
+      5: { rxTarget: -0.32, ryTarget: Math.PI / 2 - 0.38, rzTarget: -0.06 },
+      6: { rxTarget: -0.38, ryTarget: Math.PI - 0.44, rzTarget: 0.08 }
+    }[value];
+  }
+
+  function drawCube(ctx, cx, cy, size, rx, ry, rz) {
+    const vertices = [
+      [-1, -1, -1], [1, -1, -1], [1, 1, -1], [-1, 1, -1],
+      [-1, -1, 1], [1, -1, 1], [1, 1, 1], [-1, 1, 1]
+    ].map(([x, y, z]) => rotatePoint({ x: x * size, y: y * size, z: z * size }, rx, ry, rz));
+    const faces = [
+      { value: 6, points: [0, 1, 2, 3], shade: 0.82 },
+      { value: 1, points: [4, 5, 6, 7], shade: 1.04 },
+      { value: 2, points: [1, 5, 6, 2], shade: 0.9 },
+      { value: 5, points: [0, 4, 7, 3], shade: 0.78 },
+      { value: 3, points: [0, 1, 5, 4], shade: 1.0 },
+      { value: 4, points: [3, 2, 6, 7], shade: 0.86 }
+    ].map((face) => {
+      const pts3 = face.points.map((i) => vertices[i]);
+      const avgZ = pts3.reduce((sum, p) => sum + p.z, 0) / pts3.length;
+      return { ...face, pts3, avgZ, pts2: pts3.map((p) => projectPoint(p, cx, cy)) };
+    }).sort((a, b) => a.avgZ - b.avgZ);
+
+    ctx.fillStyle = `rgba(43,38,48,${0.10 + 0.14 * Math.min(1, cy / 160)})`;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy + size * 1.45, size * 1.05, size * 0.28, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    faces.forEach((face) => drawFace(ctx, face));
+  }
+
+  function rotatePoint(p, rx, ry, rz) {
+    let { x, y, z } = p;
+    let cy = Math.cos(rx), sy = Math.sin(rx);
+    [y, z] = [y * cy - z * sy, y * sy + z * cy];
+    cy = Math.cos(ry); sy = Math.sin(ry);
+    [x, z] = [x * cy + z * sy, -x * sy + z * cy];
+    cy = Math.cos(rz); sy = Math.sin(rz);
+    [x, y] = [x * cy - y * sy, x * sy + y * cy];
+    return { x, y, z };
+  }
+
+  function projectPoint(p, cx, cy) {
+    const distance = 360;
+    const scale = distance / (distance - p.z);
+    return { x: cx + p.x * scale, y: cy + p.y * scale };
+  }
+
+  function drawFace(ctx, face) {
+    const pts = face.pts2;
+    roundedPolygon(ctx, pts, 5);
+    const base = Math.round(245 * face.shade);
+    const grad = ctx.createLinearGradient(pts[0].x, pts[0].y, pts[2].x, pts[2].y);
+    grad.addColorStop(0, `rgb(${Math.min(base + 18, 255)}, ${Math.min(base + 14, 255)}, ${Math.min(base + 22, 255)})`);
+    grad.addColorStop(1, `rgb(${Math.max(base - 14, 150)}, ${Math.max(base - 18, 150)}, ${Math.max(base - 8, 150)})`);
+    ctx.fillStyle = grad;
+    ctx.fill();
+    ctx.strokeStyle = "rgba(65,48,70,0.58)";
+    ctx.lineWidth = 1.1;
+    ctx.stroke();
+    drawPips(ctx, pts, face.value);
+  }
+
+  function roundedPolygon(ctx, pts, radius) {
+    ctx.beginPath();
+    pts.forEach((point, index) => {
+      const prev = pts[(index + pts.length - 1) % pts.length];
+      const next = pts[(index + 1) % pts.length];
+      const p1 = pointAlong(point, prev, radius);
+      const p2 = pointAlong(point, next, radius);
+      if (index === 0) ctx.moveTo(p1.x, p1.y);
+      else ctx.lineTo(p1.x, p1.y);
+      ctx.quadraticCurveTo(point.x, point.y, p2.x, p2.y);
+    });
+    ctx.closePath();
+  }
+
+  function pointAlong(from, to, distance) {
+    const dx = to.x - from.x;
+    const dy = to.y - from.y;
+    const len = Math.max(1, Math.hypot(dx, dy));
+    const t = Math.min(0.42, distance / len);
+    return { x: from.x + dx * t, y: from.y + dy * t };
+  }
+
+  function drawPips(ctx, pts, value) {
+    const positions = {
+      1: [[0.5, 0.5, true]],
+      2: [[0.3, 0.3], [0.7, 0.7]],
+      3: [[0.3, 0.3], [0.5, 0.5], [0.7, 0.7]],
+      4: [[0.3, 0.3], [0.7, 0.3], [0.3, 0.7], [0.7, 0.7]],
+      5: [[0.3, 0.3], [0.7, 0.3], [0.5, 0.5], [0.3, 0.7], [0.7, 0.7]],
+      6: [[0.3, 0.24], [0.7, 0.24], [0.3, 0.5], [0.7, 0.5], [0.3, 0.76], [0.7, 0.76]]
+    }[value];
+    positions.forEach(([u, v, red]) => {
+      const p = bilinear(pts, u, v);
+      ctx.fillStyle = red ? "#ff4f7f" : "#111";
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 3.2, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  }
+
+  function bilinear(pts, u, v) {
+    const top = lerpPoint(pts[0], pts[1], u);
+    const bottom = lerpPoint(pts[3], pts[2], u);
+    return lerpPoint(top, bottom, v);
+  }
+
+  function lerpPoint(a, b, t) {
+    return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t };
+  }
+
   function addDie(value) {
     if (state.dice.length >= 5) return showToast("ダイスは5個までです");
     updateState(() => {
@@ -366,6 +699,7 @@
 
   function rollDice() {
     if (state.rollCount >= 3) return;
+    const rolledValues = [];
     updateState(() => {
       const next = [];
       const held = [];
@@ -375,6 +709,7 @@
           held[i] = true;
         } else {
           next[i] = Math.floor(Math.random() * 6) + 1;
+          rolledValues.push(next[i]);
           held[i] = false;
         }
       }
@@ -382,6 +717,7 @@
       state.held = held;
       state.rollCount += 1;
     }, { clearRedo: true });
+    showRollToast(rolledValues);
   }
 
   function confirmAction(message) {
