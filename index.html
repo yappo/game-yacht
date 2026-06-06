@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Game Yacht</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <div>
+        <p class="eyebrow">score keeper</p>
+        <h1>Game Yacht</h1>
+      </div>
+      <button class="icon-button" id="helpButton" type="button" aria-label="ヘルプを開く">?</button>
+    </header>
+
+    <main>
+      <div class="game-screen">
+        <section class="hero-score" aria-live="polite">
+          <div>
+            <span class="label">Total Score</span>
+            <strong id="totalScore">0</strong>
+          </div>
+          <div>
+            <span class="label">Turn</span>
+            <strong><span id="filledCount">0</span>/12</strong>
+          </div>
+        </section>
+
+        <section class="dice-panel">
+          <div class="panel-heading">
+            <h2 id="diceHeading">ダイス</h2>
+            <div class="dice-tools">
+              <span id="diceCount">0/5</span>
+              <label class="switch dice-switch">
+                <input id="gameMode" type="checkbox">
+                <span>Roll</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="roll-controls" id="rollControls" hidden>
+            <button class="primary-button" id="rollButton" type="button">Roll 0/3</button>
+            <p>残すダイスを選んで Roll</p>
+          </div>
+
+          <div class="dice-grid" id="manualDice" aria-label="追加するダイス">
+            <button class="die" data-add-die="1" type="button" aria-label="1を追加">1</button>
+            <button class="die" data-add-die="2" type="button" aria-label="2を追加">2</button>
+            <button class="die" data-add-die="3" type="button" aria-label="3を追加">3</button>
+            <button class="die" data-add-die="4" type="button" aria-label="4を追加">4</button>
+            <button class="die" data-add-die="5" type="button" aria-label="5を追加">5</button>
+            <button class="die" data-add-die="6" type="button" aria-label="6を追加">6</button>
+          </div>
+
+          <div class="selected-dice" id="selectedDice" aria-label="現在のダイス"></div>
+          <p class="hint" id="diceHint">選んだダイスをタップすると解除できます。</p>
+        </section>
+
+        <section class="score-panel">
+          <div class="panel-heading">
+            <h2>スコア</h2>
+            <span>タップで確定</span>
+          </div>
+          <div class="score-list" id="scoreList"></div>
+        </section>
+      </div>
+
+      <section class="history-panel">
+        <div class="panel-heading">
+          <h2>過去の結果</h2>
+          <button class="text-button danger" id="clearHistoryButton" type="button">履歴削除</button>
+        </div>
+        <div class="history-summary" id="historySummary"></div>
+        <details>
+          <summary>直近のゲーム結果</summary>
+          <div class="history-list" id="historyList"></div>
+        </details>
+      </section>
+    </main>
+
+    <nav class="action-bar" aria-label="操作">
+      <button id="undoButton" type="button">Undo</button>
+      <button id="redoButton" type="button">Redo</button>
+      <button id="newGameButton" type="button">New</button>
+      <button class="danger" id="resetButton" type="button">Reset</button>
+    </nav>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="finish-celebration" id="finishCelebration" aria-live="polite" hidden>
+    <div class="celebration-burst" aria-hidden="true"></div>
+    <div class="celebration-card">
+      <p class="celebration-kicker" id="celebrationKicker">FINISH</p>
+      <strong class="celebration-score" id="celebrationScore">0</strong>
+      <span class="celebration-message" id="celebrationMessage">Game Yacht</span>
+      <button class="celebration-close" id="celebrationClose" type="button">OK</button>
+    </div>
+  </div>
+
+  <dialog id="helpDialog">
+    <form method="dialog">
+      <div class="dialog-header">
+        <h2>ヘルプ</h2>
+        <button class="icon-button" value="close" aria-label="閉じる">×</button>
+      </div>
+      <div class="help-content">
+        <p>Game Yacht は、ヨット（Yacht）の得点を端末内だけで計算・保存するスコアキーパーです。手入力でも、アプリ内 Roll でも遊べます。</p>
+        <dl id="helpList"></dl>
+      </div>
+      <button class="primary-button" value="close">閉じる</button>
+    </form>
+  </dialog>
+
+  <script src="script.js"></script>
+</body>
+</html>
