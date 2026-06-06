@@ -20,6 +20,8 @@
 html {
   min-width: 320px;
   background: var(--bg);
+  touch-action: manipulation;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -32,11 +34,13 @@ body {
     var(--bg);
   font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", Meiryo, sans-serif;
   letter-spacing: 0;
+  touch-action: manipulation;
 }
 
 button,
 input {
   font: inherit;
+  touch-action: manipulation;
 }
 
 button {

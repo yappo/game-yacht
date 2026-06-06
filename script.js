@@ -252,13 +252,14 @@
     els.scoreList.innerHTML = "";
     for (const key of SCORE_KEYS) {
       const fixed = state.scores[key] !== null;
-      const candidate = state.dice.length === 5 ? scoreFor(key) : 0;
+      const hasDice = state.dice.length > 0;
+      const candidate = hasDice ? scoreFor(key) : 0;
       const button = document.createElement("button");
       button.type = "button";
-      button.className = `score-row ${fixed ? "filled" : state.dice.length === 5 ? "candidate" : "disabled"}`;
+      button.className = `score-row ${fixed ? "filled" : hasDice ? "candidate" : "disabled"}`;
       button.dataset.score = key;
-      button.disabled = fixed || state.dice.length !== 5;
-      button.innerHTML = `<strong>${key}</strong><span>${labelFor(key)}</span><span class="state">${fixed ? `${state.scores[key]}点` : state.dice.length === 5 ? `${candidate}点` : "-"}</span>`;
+      button.disabled = fixed || !hasDice;
+      button.innerHTML = `<strong>${key}</strong><span>${labelFor(key)}</span><span class="state">${fixed ? `${state.scores[key]}点` : hasDice ? `${candidate}点` : "-"}</span>`;
       els.scoreList.append(button);
       if (key === "6") {
         els.scoreList.append(summaryCard("1-6合計", `${upperSum()}/63`));
