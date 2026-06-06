@@ -58,16 +58,16 @@ button:disabled {
   width: min(100%, 480px);
   min-height: 100svh;
   margin: 0 auto;
-  padding: calc(2px + env(safe-area-inset-top)) 10px calc(70px + env(safe-area-inset-bottom));
+  padding: calc(1px + env(safe-area-inset-top)) 8px calc(50px + env(safe-area-inset-bottom));
 }
 
 .app-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  min-height: 30px;
-  margin-bottom: 2px;
+  gap: 8px;
+  min-height: 26px;
+  margin-bottom: 1px;
 }
 
 .eyebrow,
@@ -87,7 +87,7 @@ h2 {
 }
 
 h1 {
-  font-size: 21px;
+  font-size: 18px;
 }
 
 h2 {
@@ -95,8 +95,8 @@ h2 {
 }
 
 .icon-button {
-  width: 38px;
-  min-height: 34px;
+  width: 34px;
+  min-height: 30px;
   border: 1px solid var(--line);
   background: rgba(255, 255, 255, .9);
   color: var(--ink);
@@ -191,21 +191,22 @@ section {
 .dice-grid,
 .selected-dice {
   display: grid;
-  justify-content: space-between;
-  gap: 6px;
+  gap: 3px;
 }
 
 .selected-dice {
-  grid-template-columns: repeat(5, 50px);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  max-width: calc((100% - 15px) / 6 * 5 + 12px);
 }
 
 .dice-grid {
-  grid-template-columns: repeat(6, 50px);
+  grid-template-columns: repeat(6, minmax(0, 1fr));
 }
 
 .die {
   width: 100%;
-  height: 50px;
+  height: auto;
+  aspect-ratio: 1;
   min-height: 0;
   border: 2px solid #504154;
   background: #fff;
@@ -235,8 +236,8 @@ section {
 .die[data-add-die="6"] { --pips: radial-gradient(circle at 30% 25%, #111 0 4px, transparent 4px), radial-gradient(circle at 70% 25%, #111 0 4px, transparent 4px), radial-gradient(circle at 30% 50%, #111 0 4px, transparent 4px), radial-gradient(circle at 70% 50%, #111 0 4px, transparent 4px), radial-gradient(circle at 30% 75%, #111 0 4px, transparent 4px), radial-gradient(circle at 70% 75%, #111 0 4px, transparent 4px); }
 
 .selected-dice {
-  margin-top: 5px;
-  min-height: 50px;
+  margin-top: 4px;
+  min-height: 0;
 }
 
 .selected-dice .die {
@@ -411,19 +412,21 @@ section {
   z-index: 10;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 7px;
+  gap: 6px;
   width: min(100%, 480px);
   transform: translateX(-50%);
-  padding: 6px 10px calc(6px + env(safe-area-inset-bottom));
+  padding: 4px 8px calc(4px + env(safe-area-inset-bottom));
   border-top: 1px solid rgba(23, 33, 29, .12);
   background: rgba(255, 248, 252, .94);
   backdrop-filter: blur(12px);
 }
 
 .action-bar button {
-  min-height: 42px;
+  min-height: 32px;
+  border-radius: 7px;
   background: #352a3d;
   color: #fff;
+  font-size: 14px;
   font-weight: 800;
 }
 
